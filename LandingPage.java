@@ -83,7 +83,7 @@ public class LandingPage extends JPanel {
         }
 
         if (DatabaseUtil.authenticateUser(username, password)) {
-            mainFrame.showUserPage();
+            mainFrame.showUserPage(username);
         } else {
             JOptionPane.showMessageDialog(this, "Invalid username or password");
         }
@@ -98,7 +98,7 @@ public class LandingPage extends JPanel {
             return;
         }
 
-        if (DatabaseUtil.registerUser(username, password) {
+        if (DatabaseUtil.registerUser(username, password)) {
             JOptionPane.showMessageDialog(this, "Registration successful! Please login.");
             usernameField.setText("");
             passwordField.setText("");

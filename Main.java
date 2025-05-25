@@ -8,6 +8,7 @@ public class Main extends JFrame {
     private JPanel mainPanel;
     private LandingPage landingPage;
     private UserPage userPage;
+    private String currentUsername;
 
     public Main() {
         setTitle("Hain-ly Food Inventory Management");
@@ -19,11 +20,10 @@ public class Main extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
         landingPage = new LandingPage(this);
-        userPage = new UserPage(this);
+        userPage = null; // Will be created when user logs in
 
         // Add panels to card layout
         mainPanel.add(landingPage, "LANDING");
-        mainPanel.add(userPage, "USER");
 
         // Show landing page by default
         cardLayout.show(mainPanel, "LANDING");
@@ -32,7 +32,12 @@ public class Main extends JFrame {
         add(mainPanel);
     }
 
-    public void showUserPage() {
+    public void showUserPage(String username) {
+        this.currentUsername = username;
+        if (userPage == null) {
+            userPage = new UserPage(this, username);
+            mainPanel.add(userPage, "USER");
+        }
         cardLayout.show(mainPanel, "USER");
     }
 

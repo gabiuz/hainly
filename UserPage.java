@@ -4,6 +4,7 @@ import java.awt.*;
 import java.time.LocalDate;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class UserPage extends JPanel {
     private Main mainFrame;
@@ -13,9 +14,11 @@ public class UserPage extends JPanel {
     private JButton editButton;
     private JButton deleteButton;
     private JButton logoutButton;
+    private String currentUsername;
 
-    public UserPage(Main mainFrame) {
+    public UserPage(Main mainFrame, String username) {
         this.mainFrame = mainFrame;
+        this.currentUsername = username;
         setLayout(new BorderLayout());
         initializeComponents();
         refreshInventory();
@@ -23,7 +26,7 @@ public class UserPage extends JPanel {
 
     private void initializeComponents() {
         // Create table model
-        String[] columns = {"Name", "Quantity", "Expiry Date", "Days Until Expiry", "Category"};
+        String[] columns = {"Name", "Quantity", "Expiry Date", "Status", "Category"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -31,6 +34,25 @@ public class UserPage extends JPanel {
             }
         };
         inventoryTable = new JTable(tableModel);
+        
+        // Set up custom renderer for status column
+        inventoryTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                String status = (String) value;
+                if (status.equals("EXPIRED")) {
+                    c.setBackground(new Color(255, 200, 200)); // Light red
+                } else if (status.equals("EXPIRING SOON")) {
+                    c.setBackground(new Color(255, 255, 200)); // Light yellow
+                } else {
+                    c.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                }
+                return c;
+            }
+        });
+
         JScrollPane scrollPane = new JScrollPane(inventoryTable);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -55,13 +77,13 @@ public class UserPage extends JPanel {
 
     private void refreshInventory() {
         tableModel.setRowCount(0);
-        FoodItem[] inventory = DatabaseUtil.getInventory();
+        FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
         for (FoodItem item : inventory) {
             Object[] row = {
                 item.getName(),
                 item.getQuantity(),
                 item.getExpiryDate(),
-                item.getDaysUntilExpiry(),
+                item.getExpiryStatus(),
                 item.getCategory()
             };
             tableModel.addRow(row);
@@ -99,7 +121,7 @@ public class UserPage extends JPanel {
                 }
 
                 FoodItem item = new FoodItem(name, quantity, expiryDate, category);
-                DatabaseUtil.addFoodItem(item);
+                DatabaseUtil.addFoodItem(currentUsername, item);
                 refreshInventory();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage());
@@ -114,7 +136,7 @@ public class UserPage extends JPanel {
             return;
         }
 
-        FoodItem[] inventory = DatabaseUtil.getInventory();
+        FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
         FoodItem selectedItem = inventory[selectedRow];
 
         JTextField nameField = new JTextField(selectedItem.getName());
@@ -151,7 +173,7 @@ public class UserPage extends JPanel {
                 selectedItem.setExpiryDate(expiryDate);
                 selectedItem.setCategory(category);
 
-                DatabaseUtil.updateFoodItem(selectedItem);
+                DatabaseUtil.updateFoodItem(currentUsername, selectedItem);
                 refreshInventory();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage());
@@ -172,9 +194,9 @@ public class UserPage extends JPanel {
                 JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            FoodItem[] inventory = DatabaseUtil.getInventory();
+            FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
             FoodItem selectedItem = inventory[selectedRow];
-            DatabaseUtil.deleteFoodItem(selectedItem.getId());
+            DatabaseUtil.deleteFoodItem(currentUsername, selectedItem.getId());
             refreshInventory();
         }
     }

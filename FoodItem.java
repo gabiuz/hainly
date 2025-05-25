@@ -12,6 +12,9 @@ public class FoodItem implements Serializable {
     private String category;
 
     public FoodItem(String name, int quantity, LocalDate expiryDate, String category) {
+        if (expiryDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Expiry date cannot be in the past");
+        }
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.quantity = quantity;
@@ -44,6 +47,9 @@ public class FoodItem implements Serializable {
     }
 
     public void setExpiryDate(LocalDate expiryDate) {
+        if (expiryDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Expiry date cannot be in the past");
+        }
         this.expiryDate = expiryDate;
     }
 
@@ -59,8 +65,23 @@ public class FoodItem implements Serializable {
         return LocalDate.now().until(expiryDate).getDays();
     }
 
+    public boolean isExpired() {
+        return LocalDate.now().isAfter(expiryDate);
+    }
+
+    public String getExpiryStatus() {
+        if (isExpired()) {
+            return "EXPIRED";
+        }
+        long days = getDaysUntilExpiry();
+        if (days <= 3) {
+            return "EXPIRING SOON";
+        }
+        return "GOOD";
+    }
+
     @Override
     public String toString() {
-        return name + " (" + quantity + " units) - Expires: " + expiryDate;
+        return name + " (" + quantity + " units) - Expires: " + expiryDate + " - Status: " + getExpiryStatus();
     }
 } 

@@ -5,87 +5,60 @@ import java.util.*;
 
 public class DatabaseUtil {
     private static final String USERS_FILE = "users.txt";
-    private static final String INVENTORY_FILE = "inventory.txt";
-    private static User[] users = new User[0];
-    private static FoodItem[] inventory = new FoodItem[0];
+    private static final String INVENTORY_DIR = "inventories";
+    private static Map<String, User> users = new HashMap<>();
 
     static {
+        // Create inventories directory if it doesn't exist
+        new File(INVENTORY_DIR).mkdirs();
         loadUsers();
-        loadInventory();
     }
 
     public static boolean registerUser(String username, String password) {
-        // Check if username already exists
-        for (User user : users) {
-            if (user.getUsername().equals(username)) {
-                return false;
-            }
+        if (users.containsKey(username)) {
+            return false;
         }
         
-        // Create new array with increased size
-        User[] newUsers = new User[users.length + 1];
-        System.arraycopy(users, 0, newUsers, 0, users.length);
-        newUsers[users.length] = new User(username, password);
-        users = newUsers;
-        
+        users.put(username, new User(username, password));
+        // Create empty inventory file for new user
+        saveInventory(username, new HashMap<>());
         saveUsers();
         return true;
     }
 
     public static boolean authenticateUser(String username, String password) {
-        for (User user : users) {
-            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
-                return true;
-            }
-        }
-        return false;
+        User user = users.get(username);
+        return user != null && user.getPassword().equals(password);
     }
 
-    public static void addFoodItem(FoodItem item) {
-        FoodItem[] newInventory = new FoodItem[inventory.length + 1];
-        System.arraycopy(inventory, 0, newInventory, 0, inventory.length);
-        newInventory[inventory.length] = item;
-        inventory = newInventory;
-        saveInventory();
+    public static void addFoodItem(String username, FoodItem item) {
+        Map<String, FoodItem> userInventory = loadInventory(username);
+        userInventory.put(item.getId(), item);
+        saveInventory(username, userInventory);
     }
 
-    public static void updateFoodItem(FoodItem item) {
-        for (int i = 0; i < inventory.length; i++) {
-            if (inventory[i].getId().equals(item.getId())) {
-                inventory[i] = item;
-                break;
-            }
-        }
-        saveInventory();
+    public static void updateFoodItem(String username, FoodItem item) {
+        Map<String, FoodItem> userInventory = loadInventory(username);
+        userInventory.put(item.getId(), item);
+        saveInventory(username, userInventory);
     }
 
-    public static void deleteFoodItem(String id) {
-        int indexToRemove = -1;
-        for (int i = 0; i < inventory.length; i++) {
-            if (inventory[i].getId().equals(id)) {
-                indexToRemove = i;
-                break;
-            }
-        }
-        
-        if (indexToRemove != -1) {
-            FoodItem[] newInventory = new FoodItem[inventory.length - 1];
-            System.arraycopy(inventory, 0, newInventory, 0, indexToRemove);
-            System.arraycopy(inventory, indexToRemove + 1, newInventory, indexToRemove, inventory.length - indexToRemove - 1);
-            inventory = newInventory;
-            saveInventory();
-        }
+    public static void deleteFoodItem(String username, String id) {
+        Map<String, FoodItem> userInventory = loadInventory(username);
+        userInventory.remove(id);
+        saveInventory(username, userInventory);
     }
 
-    public static FoodItem[] getInventory() {
-        return Arrays.copyOf(inventory, inventory.length);
+    public static FoodItem[] getInventory(String username) {
+        Map<String, FoodItem> userInventory = loadInventory(username);
+        return userInventory.values().toArray(new FoodItem[0]);
     }
 
     private static void loadUsers() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(USERS_FILE))) {
-            users = (User[]) ois.readObject();
+            users = (Map<String, User>) ois.readObject();
         } catch (Exception e) {
-            users = new User[0];
+            users = new HashMap<>();
         }
     }
 
@@ -97,16 +70,18 @@ public class DatabaseUtil {
         }
     }
 
-    private static void loadInventory() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(INVENTORY_FILE))) {
-            inventory = (FoodItem[]) ois.readObject();
+    private static Map<String, FoodItem> loadInventory(String username) {
+        File inventoryFile = new File(INVENTORY_DIR, username + ".inventory");
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inventoryFile))) {
+            return (Map<String, FoodItem>) ois.readObject();
         } catch (Exception e) {
-            inventory = new FoodItem[0];
+            return new HashMap<>();
         }
     }
 
-    private static void saveInventory() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(INVENTORY_FILE))) {
+    private static void saveInventory(String username, Map<String, FoodItem> inventory) {
+        File inventoryFile = new File(INVENTORY_DIR, username + ".inventory");
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(inventoryFile))) {
             oos.writeObject(inventory);
         } catch (IOException e) {
             e.printStackTrace();
