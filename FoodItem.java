@@ -2,6 +2,7 @@ package com.hainly;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public class FoodItem implements Serializable {
@@ -62,26 +63,29 @@ public class FoodItem implements Serializable {
     }
 
     public long getDaysUntilExpiry() {
-        return LocalDate.now().until(expiryDate).getDays();
-    }
-
-    public boolean isExpired() {
-        return LocalDate.now().isAfter(expiryDate);
-    }
-
-    public String getExpiryStatus() {
-        if (isExpired()) {
-            return "EXPIRED";
+        LocalDate today = LocalDate.now();
+        if (expiryDate.isBefore(today)) {
+            return -ChronoUnit.DAYS.between(expiryDate, today);
+        } else {
+            return ChronoUnit.DAYS.between(today, expiryDate);
         }
+    }
+
+    public String getExpiryDisplay() {
         long days = getDaysUntilExpiry();
-        if (days <= 3) {
-            return "EXPIRING SOON";
+        if (days < 0) {
+            return "Expired " + Math.abs(days) + " days ago";
+        } else if (days == 0) {
+            return "Expires today";
+        } else if (days == 1) {
+            return "Expires tomorrow";
+        } else {
+            return days + " days until expiry";
         }
-        return "GOOD";
     }
 
     @Override
     public String toString() {
-        return name + " (" + quantity + " units) - Expires: " + expiryDate + " - Status: " + getExpiryStatus();
+        return name + " (" + quantity + " units) - " + getExpiryDisplay();
     }
 } 

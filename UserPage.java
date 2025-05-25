@@ -26,7 +26,7 @@ public class UserPage extends JPanel {
 
     private void initializeComponents() {
         // Create table model
-        String[] columns = {"Name", "Quantity", "Expiry Date", "Status", "Category"};
+        String[] columns = {"Name", "Quantity", "Expiry Date", "Time Until Expiry", "Category"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -35,19 +35,25 @@ public class UserPage extends JPanel {
         };
         inventoryTable = new JTable(tableModel);
         
-        // Set up custom renderer for status column
+        // Set up custom renderer for expiry column
         inventoryTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
                     boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                String status = (String) value;
-                if (status.equals("EXPIRED")) {
-                    c.setBackground(new Color(255, 200, 200)); // Light red
-                } else if (status.equals("EXPIRING SOON")) {
-                    c.setBackground(new Color(255, 255, 200)); // Light yellow
+                String expiryText = (String) value;
+                
+                if (expiryText.startsWith("Expired")) {
+                    c.setBackground(new Color(255, 200, 200)); // Light red for expired
+                } else if (expiryText.equals("Expires today") || expiryText.equals("Expires tomorrow")) {
+                    c.setBackground(new Color(255, 255, 200)); // Light yellow for expiring soon
                 } else {
-                    c.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                    long days = Long.parseLong(expiryText.split(" ")[0]);
+                    if (days <= 3) {
+                        c.setBackground(new Color(255, 255, 200)); // Light yellow for 3 days or less
+                    } else {
+                        c.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                    }
                 }
                 return c;
             }
@@ -83,7 +89,7 @@ public class UserPage extends JPanel {
                 item.getName(),
                 item.getQuantity(),
                 item.getExpiryDate(),
-                item.getExpiryStatus(),
+                item.getExpiryDisplay(),
                 item.getCategory()
             };
             tableModel.addRow(row);
