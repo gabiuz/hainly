@@ -27,6 +27,10 @@ public class FoodItem implements Serializable {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -88,4 +92,4 @@ public class FoodItem implements Serializable {
     public String toString() {
         return name + " (" + quantity + " units) - " + getExpiryDisplay();
     }
-} 
+}
