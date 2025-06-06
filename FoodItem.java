@@ -1,10 +1,11 @@
 package com.hainly;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-public class FoodItem {
+public class FoodItem implements Serializable {
     private String id;
     private String name;
     private int quantity;
