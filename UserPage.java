@@ -7,6 +7,25 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 public class UserPage extends JPanel {
+
+    private Main mainFrame;
+    private JTable inventoryTable;
+    private DefaultTableModel tableModel;
+    private JButton addButton;
+    private JButton editButton;
+    private JButton deleteButton;
+    private JButton logoutButton;
+    private JTextField searchField;
+    private JButton searchButton;
+    private String currentUsername;
+
+    public UserPage(Main mainFrame, String username) {
+        this.mainFrame = mainFrame;
+        this.currentUsername = username;
+        setLayout(new BorderLayout());
+        initializeComponents();
+        refreshInventory();
+
   private Main mainFrame;
   private JTable inventoryTable;
   private DefaultTableModel tableModel;
@@ -127,20 +146,133 @@ public class UserPage extends JPanel {
           throw new IllegalArgumentException("Name and category cannot be empty");
         }
 
+
+    private void initializeComponents() {
+        // Create search panel
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchField = new JTextField(20);
+        searchButton = new JButton("Search");
+        JButton clearButton = new JButton("Clear");
+
+        searchButton.addActionListener(e -> performSearch());
+        clearButton.addActionListener(e -> {
+            searchField.setText("");
+            refreshInventory();
+        });
+
+        searchPanel.add(new JLabel("Search by name: "));
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        searchPanel.add(clearButton);
+        add(searchPanel, BorderLayout.NORTH);
+
+        // Create table model
+        String[] columns = { "Name", "Quantity", "Expiry Date", "Time Until Expiry", "Category" };
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        inventoryTable = new JTable(tableModel);
+
+        // Set up custom renderer for expiry column
+        inventoryTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                String expiryText = (String) value;
+
+                if (expiryText.startsWith("Expired")) {
+                    c.setBackground(new Color(255, 200, 200)); // Light red for expired
+                } else if (expiryText.equals("Expires today") || expiryText.equals("Expires tomorrow")) {
+                    c.setBackground(new Color(255, 255, 200)); // Light yellow for expiring soon
+                } else {
+                    long days = Long.parseLong(expiryText.split(" ")[0]);
+                    if (days <= 3) {
+                        c.setBackground(new Color(255, 255, 200)); // Light yellow for 3 days or less
+                    } else {
+                        c.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                    }
+                }
+                return c;
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(inventoryTable);
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Create button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        addButton = new JButton("Add Item");
+        editButton = new JButton("Edit Item");
+        deleteButton = new JButton("Delete Item");
+        logoutButton = new JButton("Logout");
+
+        addButton.addActionListener(e -> showAddItemDialog());
+        editButton.addActionListener(e -> showEditItemDialog());
+        deleteButton.addActionListener(e -> deleteSelectedItem());
+        logoutButton.addActionListener(e -> mainFrame.showLandingPage());
+
+        buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(logoutButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+
         FoodItem item = new FoodItem(name, quantity, expiryDate, category);
         DatabaseUtil.addFoodItem(currentUsername, item);
         refreshInventory();
       } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Invalid input: " + e.getMessage());
       }
+
     }
   }
+
+
+    private void performSearch() {
+        String searchTerm = searchField.getText().trim();
+        if (searchTerm.isEmpty()) {
+            refreshInventory();
+            return;
+        }
+
+        tableModel.setRowCount(0);
+        FoodItem[] searchResults = DatabaseUtil.searchFoodItemsByName(currentUsername, searchTerm);
+        for (FoodItem item : searchResults) {
+            Object[] row = {
+                    item.getName(),
+                    item.getQuantity(),
+                    item.getExpiryDate(),
+                    item.getExpiryDisplay(),
+                    item.getCategory()
+            };
+            tableModel.addRow(row);
+        }
+    }
+
+    private void refreshInventory() {
+        tableModel.setRowCount(0);
+        FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
+        for (FoodItem item : inventory) {
+            Object[] row = {
+                    item.getName(),
+                    item.getQuantity(),
+                    item.getExpiryDate(),
+                    item.getExpiryDisplay(),
+                    item.getCategory()
+            };
+            tableModel.addRow(row);
+        }
 
   private void showEditItemDialog() {
     int selectedRow = inventoryTable.getSelectedRow();
     if (selectedRow == -1) {
       JOptionPane.showMessageDialog(this, "Please select an item to edit");
       return;
+
     }
 
     FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
@@ -206,5 +338,9 @@ public class UserPage extends JPanel {
       DatabaseUtil.deleteFoodItem(currentUsername, selectedItem.getId());
       refreshInventory();
     }
+
+}
+
   }
 }
+

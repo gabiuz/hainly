@@ -77,6 +77,27 @@ public class DatabaseUtil {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+
+    public static FoodItem[] searchFoodItemsByName(String username, String searchTerm) {
+        Map<String, FoodItem> userInventory = loadInventory(username);
+        return userInventory.values().stream()
+                .filter(item -> item.getName().toLowerCase().contains(searchTerm.toLowerCase()))
+                .toArray(FoodItem[]::new);
+    }
+
+    private static void loadUsers() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(USERS_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\|");
+                if (parts.length == 2) {
+                    users.put(parts[0], new User(parts[0], parts[1]));
+                }
+            }
+        } catch (IOException e) {
+            users = new HashMap<>();
+
   }
 
   private static Map<String, FoodItem> loadInventory(String username) {
