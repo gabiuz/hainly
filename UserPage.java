@@ -14,6 +14,8 @@ public class UserPage extends JPanel {
     private JButton editButton;
     private JButton deleteButton;
     private JButton logoutButton;
+    private JTextField searchField;
+    private JButton searchButton;
     private String currentUsername;
 
     public UserPage(Main mainFrame, String username) {
@@ -25,8 +27,26 @@ public class UserPage extends JPanel {
     }
 
     private void initializeComponents() {
+        // Create search panel
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchField = new JTextField(20);
+        searchButton = new JButton("Search");
+        JButton clearButton = new JButton("Clear");
+
+        searchButton.addActionListener(e -> performSearch());
+        clearButton.addActionListener(e -> {
+            searchField.setText("");
+            refreshInventory();
+        });
+
+        searchPanel.add(new JLabel("Search by name: "));
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        searchPanel.add(clearButton);
+        add(searchPanel, BorderLayout.NORTH);
+
         // Create table model
-        String[] columns = {"Name", "Quantity", "Expiry Date", "Time Until Expiry", "Category"};
+        String[] columns = { "Name", "Quantity", "Expiry Date", "Time Until Expiry", "Category" };
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -34,7 +54,7 @@ public class UserPage extends JPanel {
             }
         };
         inventoryTable = new JTable(tableModel);
-        
+
         // Set up custom renderer for expiry column
         inventoryTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
@@ -42,7 +62,7 @@ public class UserPage extends JPanel {
                     boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 String expiryText = (String) value;
-                
+
                 if (expiryText.startsWith("Expired")) {
                     c.setBackground(new Color(255, 200, 200)); // Light red for expired
                 } else if (expiryText.equals("Expires today") || expiryText.equals("Expires tomorrow")) {
@@ -81,16 +101,37 @@ public class UserPage extends JPanel {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    private void performSearch() {
+        String searchTerm = searchField.getText().trim();
+        if (searchTerm.isEmpty()) {
+            refreshInventory();
+            return;
+        }
+
+        tableModel.setRowCount(0);
+        FoodItem[] searchResults = DatabaseUtil.searchFoodItemsByName(currentUsername, searchTerm);
+        for (FoodItem item : searchResults) {
+            Object[] row = {
+                    item.getName(),
+                    item.getQuantity(),
+                    item.getExpiryDate(),
+                    item.getExpiryDisplay(),
+                    item.getCategory()
+            };
+            tableModel.addRow(row);
+        }
+    }
+
     private void refreshInventory() {
         tableModel.setRowCount(0);
         FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
         for (FoodItem item : inventory) {
             Object[] row = {
-                item.getName(),
-                item.getQuantity(),
-                item.getExpiryDate(),
-                item.getExpiryDisplay(),
-                item.getCategory()
+                    item.getName(),
+                    item.getQuantity(),
+                    item.getExpiryDate(),
+                    item.getExpiryDisplay(),
+                    item.getCategory()
             };
             tableModel.addRow(row);
         }
@@ -206,4 +247,4 @@ public class UserPage extends JPanel {
             refreshInventory();
         }
     }
-} 
+}

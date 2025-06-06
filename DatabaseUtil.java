@@ -55,6 +55,13 @@ public class DatabaseUtil {
         return userInventory.values().toArray(new FoodItem[0]);
     }
 
+    public static FoodItem[] searchFoodItemsByName(String username, String searchTerm) {
+        Map<String, FoodItem> userInventory = loadInventory(username);
+        return userInventory.values().stream()
+                .filter(item -> item.getName().toLowerCase().contains(searchTerm.toLowerCase()))
+                .toArray(FoodItem[]::new);
+    }
+
     private static void loadUsers() {
         try (BufferedReader reader = new BufferedReader(new FileReader(USERS_FILE))) {
             String line;
