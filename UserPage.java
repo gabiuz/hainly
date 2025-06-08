@@ -84,10 +84,10 @@ public class UserPage extends JPanel {
         if (expiryText.startsWith("Expired")) {
           c.setBackground(new Color(255, 200, 200)); // Light red for expired
         } else if (expiryText.equals("Expires today") || expiryText.equals("Expires tomorrow")) {
-          c.setBackground(new Color(255, 255, 200)); // Light yellow for expiring soon
+          c.setBackground(new Color(255, 165, 0)); // orange for expires today or expires tomorrow
         } else {
           long days = Long.parseLong(expiryText.split(" ")[0]);
-          if (days <= 3) {
+          if (days <= 7) {
             c.setBackground(new Color(255, 255, 200)); // Light yellow for 3 days or less
           } else {
             c.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
