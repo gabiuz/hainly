@@ -212,8 +212,9 @@ public class UserPage extends JPanel {
     panel.add(new JLabel("Category:"));
     panel.add(categoryField);
 
-    int result = JOptionPane.showConfirmDialog(this, panel, "Add New Item",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+   int result = JOptionPane.showOptionDialog(this, panel, "Add New Item",
+    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, 
+    new String[]{"Save", "Cancel"}, "Save");
 
     if (result == JOptionPane.OK_OPTION) {
       try {
@@ -265,8 +266,9 @@ public class UserPage extends JPanel {
     panel.add(new JLabel("Category:"));
     panel.add(categoryField);
 
-    int result = JOptionPane.showConfirmDialog(this, panel, "Edit Item",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+    int result = JOptionPane.showOptionDialog(this, panel, "Edit Item",
+    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, 
+    new String[]{"Save", "Cancel"}, "Save");
 
     if (result == JOptionPane.OK_OPTION) {
       try {
