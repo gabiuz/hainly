@@ -7,8 +7,11 @@ import java.util.Comparator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import java.util.*;
 
 public class UserPage extends JPanel {
+
+  private static Map<String, User> users = new HashMap<>();
 
   private static final String[] UNIT_OPTIONS = {
       "g (grams)",
@@ -172,7 +175,7 @@ public class UserPage extends JPanel {
   private void refreshInventory() {
     tableModel.setRowCount(0);
     FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
-    if (sortButton != null) {  // Only sort if the button has been initialized
+    if (sortButton != null) { // Only sort if the button has been initialized
       Arrays.sort(inventory, new Comparator<FoodItem>() {
         @Override
         public int compare(FoodItem item1, FoodItem item2) {
@@ -212,9 +215,9 @@ public class UserPage extends JPanel {
     panel.add(new JLabel("Category:"));
     panel.add(categoryField);
 
-   int result = JOptionPane.showOptionDialog(this, panel, "Add New Item",
-    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, 
-    new String[]{"Save", "Cancel"}, "Save");
+    int result = JOptionPane.showOptionDialog(this, panel, "Add New Item",
+        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+        new String[] { "Save", "Cancel" }, "Save");
 
     if (result == JOptionPane.OK_OPTION) {
       try {
@@ -244,8 +247,22 @@ public class UserPage extends JPanel {
       return;
     }
 
+    String selectedName = (String) tableModel.getValueAt(selectedRow, 0);
     FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
-    FoodItem selectedItem = inventory[selectedRow];
+    FoodItem selectedItem = null;
+    
+    // Find the selected item by name
+    for (FoodItem item : inventory) {
+      if (item.getName().equals(selectedName)) {
+        selectedItem = item;
+        break;
+      }
+    }
+
+    if (selectedItem == null) {
+      JOptionPane.showMessageDialog(this, "Error: Could not find selected item");
+      return;
+    }
 
     JTextField nameField = new JTextField(selectedItem.getName());
     JTextField quantityField = new JTextField(String.valueOf(selectedItem.getQuantity()));
@@ -267,8 +284,8 @@ public class UserPage extends JPanel {
     panel.add(categoryField);
 
     int result = JOptionPane.showOptionDialog(this, panel, "Edit Item",
-    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, 
-    new String[]{"Save", "Cancel"}, "Save");
+        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+        new String[] { "Save", "Cancel" }, "Save");
 
     if (result == JOptionPane.OK_OPTION) {
       try {
@@ -315,4 +332,5 @@ public class UserPage extends JPanel {
       refreshInventory();
     }
   }
+
 }
