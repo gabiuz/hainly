@@ -314,10 +314,8 @@ public class UserPage extends JPanel {
         JOptionPane.YES_NO_OPTION);
 
     if (confirm == JOptionPane.YES_OPTION) {
-      String selectedId = (String) tableModel.getValueAt(selectedRow, 0); // Retrieve the inventory again to find the item by ID
-      FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
-      FoodItem selectedItem = inventory[selectedRow];
-      DatabaseUtil.deleteFoodItem(currentUsername, selectedId());
+      String selectedId = (String) tableModel.getValueAt(selectedRow, 0);
+      DatabaseUtil.deleteFoodItem(currentUsername, selectedId);
       refreshInventory();
     }
   }
