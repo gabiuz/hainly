@@ -1,4 +1,4 @@
-package com.hainly;
+package hainly;
 
 public class User {
     private String username;

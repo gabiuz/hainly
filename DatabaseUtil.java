@@ -1,4 +1,4 @@
-package com.hainly;
+package hainly;
 
 import java.io.*;
 import java.time.LocalDate;

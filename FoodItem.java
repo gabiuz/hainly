@@ -1,4 +1,4 @@
-package com.hainly;
+package hainly;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
