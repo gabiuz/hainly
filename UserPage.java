@@ -2,12 +2,10 @@ package hainly;
 
 import java.awt.*;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Comparator;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import java.util.*;
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 public class UserPage extends JPanel {
 
@@ -133,6 +131,15 @@ public class UserPage extends JPanel {
 
     tableModel.setRowCount(0);
     FoodItem[] searchResults = DatabaseUtil.searchFoodItemsByName(currentUsername, searchTerm);
+
+    //Apply sorting to search results
+    Arrays.sort(searchResults, new Comparator<FoodItem>() {
+      @Override
+      public int compare(FoodItem item1, FoodItem item2) {
+        int comparison = item1.getExpiryDate().compareTo(item2.getExpiryDate());
+        return isAscending ? comparison : -comparison;
+      }
+    });
     for (FoodItem item : searchResults) {
       Object[] row = {
           item.getId(), // Include ID for internal use
@@ -149,11 +156,14 @@ public class UserPage extends JPanel {
   private void toggleSort() {
     isAscending = !isAscending;
     sortButton.setText("Sort by Expiry " + (isAscending ? "↑" : "↓"));
-    sortInventory();
+    refreshInventory();
   }
 
-  private void sortInventory() {
+  private void refreshInventory() {
+    tableModel.setRowCount(0);
     FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
+
+    //Always sort the inventory when refreshing
     Arrays.sort(inventory, new Comparator<FoodItem>() {
       @Override
       public int compare(FoodItem item1, FoodItem item2) {
@@ -161,32 +171,6 @@ public class UserPage extends JPanel {
         return isAscending ? comparison : -comparison;
       }
     });
-
-    tableModel.setRowCount(0);
-    for (FoodItem item : inventory) {
-      Object[] row = {
-          item.getName(),
-          item.getQuantity() + " " + item.getUnit(),
-          item.getExpiryDate(),
-          item.getExpiryDisplay(),
-          item.getCategory()
-      };
-      tableModel.addRow(row);
-    }
-  }
-
-  private void refreshInventory() {
-    tableModel.setRowCount(0);
-    FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
-    if (sortButton != null) { // Only sort if the button has been initialized
-      Arrays.sort(inventory, new Comparator<FoodItem>() {
-        @Override
-        public int compare(FoodItem item1, FoodItem item2) {
-          int comparison = item1.getExpiryDate().compareTo(item2.getExpiryDate());
-          return isAscending ? comparison : -comparison;
-        }
-      });
-    }
     for (FoodItem item : inventory) {
       Object[] row = {
           item.getId(), // Include ID for internal use
