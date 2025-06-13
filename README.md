@@ -47,7 +47,7 @@ Food spoilage, contamination, and waste are global issues that threaten health, 
 
 ---
 
-## 🙌 Contributors
+## 🙌 Members
 - Barbin, Kyla J.
 - Bernal, Joan E.
 - Fajardo, Bonna Mae T.
