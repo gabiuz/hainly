@@ -247,13 +247,13 @@ public class UserPage extends JPanel {
       return;
     }
 
-    String selectedId = (String) tableModel.getValueAt(selectedRow, 0);
+    String selectedName = (String) tableModel.getValueAt(selectedRow, 0);
     FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
     FoodItem selectedItem = null;
 
-    // Find the selected item by id
+    // Find the selected item by name
     for (FoodItem item : inventory) {
-      if (item.getId().equals(selectedId)) {
+        if (item.getName().equals(selectedName)) {
         selectedItem = item;
         break;
       }
