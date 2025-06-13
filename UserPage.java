@@ -67,7 +67,7 @@ public class UserPage extends JPanel {
     add(searchPanel, BorderLayout.NORTH);
 
     // Create table model
-    String[] columns = { "Name", "Quantity", "Expiry Date", "Time Until Expiry", "Category" };
+    String[] columns = { "ID", "Name", "Quantity", "Expiry Date", "Time Until Expiry", "Category" };
     tableModel = new DefaultTableModel(columns, 0) {
       @Override
       public boolean isCellEditable(int row, int column) {
@@ -75,6 +75,8 @@ public class UserPage extends JPanel {
       }
     };
     inventoryTable = new JTable(tableModel);
+    
+    inventoryTable.removeColumn(inventoryTable.getColumnModel().getColumn(0));
 
     // Set up custom renderer for expiry column
     inventoryTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
@@ -133,6 +135,7 @@ public class UserPage extends JPanel {
     FoodItem[] searchResults = DatabaseUtil.searchFoodItemsByName(currentUsername, searchTerm);
     for (FoodItem item : searchResults) {
       Object[] row = {
+          item.getId(), // Include ID for internal use
           item.getName(),
           item.getQuantity() + " " + item.getUnit(),
           item.getExpiryDate(),
@@ -186,6 +189,7 @@ public class UserPage extends JPanel {
     }
     for (FoodItem item : inventory) {
       Object[] row = {
+          item.getId(), // Include ID for internal use
           item.getName(),
           item.getQuantity() + " " + item.getUnit(),
           item.getExpiryDate(),
@@ -247,13 +251,13 @@ public class UserPage extends JPanel {
       return;
     }
 
-    String selectedName = (String) tableModel.getValueAt(selectedRow, 0);
+    String selectedId = (String) tableModel.getValueAt(selectedRow, 0);
     FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
     FoodItem selectedItem = null;
 
     // Find the selected item by name
     for (FoodItem item : inventory) {
-        if (item.getName().equals(selectedName)) {
+        if (item.getId().equals(selectedId)) {
         selectedItem = item;
         break;
       }
@@ -326,9 +330,10 @@ public class UserPage extends JPanel {
         JOptionPane.YES_NO_OPTION);
 
     if (confirm == JOptionPane.YES_OPTION) {
+      String selectedId = (String) tableModel.getValueAt(selectedRow, 0); // Retrieve the inventory again to find the item by ID
       FoodItem[] inventory = DatabaseUtil.getInventory(currentUsername);
       FoodItem selectedItem = inventory[selectedRow];
-      DatabaseUtil.deleteFoodItem(currentUsername, selectedItem.getId());
+      DatabaseUtil.deleteFoodItem(currentUsername, selectedId());
       refreshInventory();
     }
   }
