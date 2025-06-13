@@ -25,6 +25,11 @@ Food spoilage, contamination, and waste are global issues that threaten health, 
 #### 🗃️ Inventory Overview
 - View your household's current food items.
 - Receive notifications about product expiries.
+  - the system uses **color-coded indicators** to show item status:
+    - ⚪ White: Not nearing expiration
+    - 🟡 Yellow: Nearing expiration
+    - 🟠 Orange: Expiring Today or Tomorrow
+    - 🔴 Red: Expired
 - Track days left before each item expires.
 
 #### 🔄 CRUD Functionality
