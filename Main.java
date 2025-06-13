@@ -1,7 +1,9 @@
 package com.hainly;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.CardLayout;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class Main extends JFrame {
     private CardLayout cardLayout;
@@ -33,11 +35,19 @@ public class Main extends JFrame {
     }
 
     public void showUserPage(String username) {
-        this.currentUsername = username;
-        if (userPage == null) {
-            userPage = new UserPage(this, username);
-            mainPanel.add(userPage, "USER");
+        // If userpage from a previous session already exists, remove it
+        if (userPage != null) {
+            mainPanel.remove(userPage);
         }
+
+        // create a new UserPage instance
+        // guaranteeing that the userPage is always fresh
+        userPage = new UserPage(this, username);
+
+        // add the new userPage to the mainPanel
+        mainPanel.add(userPage, "USER");
+
+        // switch to the user page view
         cardLayout.show(mainPanel, "USER");
     }
 
