@@ -253,7 +253,7 @@ public class UserPage extends JPanel {
 
     // Find the selected item by id
     for (FoodItem item : inventory) {
-      if (item.getName().equals(selectedId)) {
+      if (item.getId().equals(selectedId)) {
         selectedItem = item;
         break;
       }
