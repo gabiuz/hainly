@@ -35,7 +35,6 @@ public class LandingPage extends JPanel {
         Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
         logoIcon = new ImageIcon(scaledImage);
 
-
         // Create logo and title panel
         JLabel logoLabel = new JLabel(logoIcon);
         JLabel titleLabel = new JLabel("Welcome to Hain-ly");
@@ -60,7 +59,6 @@ public class LandingPage extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         add(titlePanel, gbc);
-
 
         // Username
         gbc.gridwidth = 1;
