@@ -17,18 +17,50 @@ public class LandingPage extends JPanel {
     }
 
     private void initializeComponents() {
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Title
+        // Load and scale the logo
+        int targetWidth = 150;
+        ImageIcon logoIcon = new ImageIcon("logo.png");
+        Image originalImage = logoIcon.getImage();
+
+        // Compute height while preserving aspect ratio
+        int originalWidth = logoIcon.getIconWidth();
+        int originalHeight = logoIcon.getIconHeight();
+        int targetHeight = (originalHeight * targetWidth) / originalWidth;
+
+        Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+        logoIcon = new ImageIcon(scaledImage);
+
+
+        // Create logo and title panel
+        JLabel logoLabel = new JLabel(logoIcon);
         JLabel titleLabel = new JLabel("Welcome to Hain-ly");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Use a vertical BoxLayout to stack logo and title
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
+        titlePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        titlePanel.add(logoLabel);
+        titlePanel.add(Box.createVerticalStrut(10)); // Space between logo and title
+        titlePanel.add(titleLabel);
+
+        // Add title panel to main layout
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        add(titleLabel, gbc);
+        add(titlePanel, gbc);
+
 
         // Username
         gbc.gridwidth = 1;

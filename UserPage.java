@@ -43,6 +43,17 @@ public class UserPage extends JPanel {
   }
 
   private void initializeComponents() {
+    // Load and scale the logo
+    ImageIcon logoIcon = new ImageIcon("logo.png"); // Adjust path if needed
+    Image originalImage = logoIcon.getImage();
+    int targetWidth = 100;
+    int originalWidth = logoIcon.getIconWidth();
+    int originalHeight = logoIcon.getIconHeight();
+    int targetHeight = (originalHeight * targetWidth) / originalWidth;
+    Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+    logoIcon = new ImageIcon(scaledImage);
+    JLabel logoLabel = new JLabel(logoIcon);
+
     // Create search panel
     JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     searchField = new JTextField(20);
@@ -62,6 +73,7 @@ public class UserPage extends JPanel {
     searchPanel.add(searchButton);
     searchPanel.add(clearButton);
     searchPanel.add(sortButton);
+    searchPanel.add(logoLabel);
     add(searchPanel, BorderLayout.NORTH);
 
     // Create table model
