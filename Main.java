@@ -10,7 +10,6 @@ public class Main extends JFrame {
     private JPanel mainPanel;
     private LandingPage landingPage;
     private UserPage userPage;
-    private String currentUsername;
 
     public Main() {
         setTitle("Hain-ly Food Inventory Management");
